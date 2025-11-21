@@ -1,0 +1,47 @@
+[package]
+name = "salsaa"
+version = "0.1.0"
+edition = "2021"
+default-run = "main"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+[features]
+A0 = []
+A1 = []
+A2 = []
+B0 = []
+B1 = []
+B2 = []
+C0 = []
+C1 = []
+C2 = []
+F0 = []
+F1 = []
+F2 = []
+
+[dependencies]
+criterion = "0.6.0"
+rand = "0.9.1" 
+num-traits = "0.2.19"
+rayon = "1.10.0"
+chrono = "0.4.41"
+parking_lot = "0.12.4"
+cfg-if = "1.0.3"
+
+[profile.dev]
+opt-level = 3
+
+[profile.release]
+opt-level = 3
+debug = false
+
+[profile.bench]
+opt-level = 3         # full optimizations (default)
+debug = false         # no debug symbols
+overflow-checks = false
+
+[[bench]]
+name = "bench"
+harness = false

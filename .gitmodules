@@ -1,0 +1,18 @@
+[submodule "hexl-bindings/hexl"]
+	path = hexl-bindings/hexl
+	url = git@github.com:IntelLabs/hexl.git
+[submodule "hexl-bindings/libdivide"]
+	path = hexl-bindings/libdivide
+	url = git@github.com:ridiculousfish/libdivide.git
+[submodule "est/rok_estimator/lattice_lib"]
+	path = est/rok_estimator/lattice_lib
+	url = git@github.com:russell-lai/lattice_lib.git
+[submodule "est/rok_estimator/lattice-estimator"]
+	path = est/rok_estimator/lattice-estimator
+	url = git@github.com:malb/lattice-estimator.git
+[submodule "klno25-baseline/rok_estimator/lattice-estimator"]
+	path = klno25-baseline/rok_estimator/lattice-estimator
+	url = git@github.com:malb/lattice-estimator.git
+[submodule "klno25-baseline/rok_estimator/lattice_lib"]
+	path = klno25-baseline/rok_estimator/lattice_lib
+	url = git@github.com:russell-lai/lattice_lib.git

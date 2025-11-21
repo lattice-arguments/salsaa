@@ -1,0 +1,442 @@
+warning: function `par_inner_product` is never used
+   --> src/arithmetic.rs:458:4
+    |
+458 | fn par_inner_product<T>(vec_a: &[T], vec_b: &[T], num_chunks: usize) -> T
+    |    ^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: methods `forward_ntt` and `inverse_ntt` are never used
+   --> src/cyclotomic_ring.rs:370:8
+    |
+249 | impl<const MOD_Q: u64, const N: usize> CyclotomicRing<MOD_Q, N> {
+    | --------------------------------------------------------------- methods in this implementation
+...
+370 |     fn forward_ntt(&mut self) {
+    |        ^^^^^^^^^^^
+...
+374 |     fn inverse_ntt(&mut self) {
+    |        ^^^^^^^^^^^
+
+warning: function `sum_check_wrapper` is never used
+   --> src/subroutines/fast_norm_check.rs:203:4
+    |
+203 | fn sum_check_wrapper<const MOD_Q: u64>(w: &Vec<u64>) -> (Vec<u64>, u64) {
+    |    ^^^^^^^^^^^^^^^^^
+
+warning: `ring_arith` (lib) generated 3 warnings
+    Finished `release` profile [optimized] target(s) in 3.49s
+     Running `target/release/main`
+[2025-10-01 06:02:05.939] PARAMS: NEW: true, MODULE: 7, WIT_LEN: 262144, WIT_REP: 1, Q: 1125899906840833, N: 256, DECOMP_PARTS: [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+[2025-10-01 06:02:05.939] Start CRS
+[2025-10-01 06:02:06.424] end CRS
+[2025-10-01 06:02:07.287] end sampling witness
+[2025-10-01 06:02:07.341] Time for parallel_dot_series_matrix (commitment): 53.93ms
+[2025-10-01 06:02:07.359] Time for prover::norm_1: 18.16ms
+[2025-10-01 06:02:07.359] Time for verifier::verify_norm_1: 48.00ns
+number of witness rep: 1
+[2025-10-01 06:02:07.426] Time for prover::norm_2: 67.14ms
+[2025-10-01 06:02:07.426] Time for verifier::verify_norm_2: 41.00ns
+[2025-10-01 06:02:07.446] Time to complete power series: 19.67ms
+[2025-10-01 06:02:07.455] Time to compute new RHS: 9.07ms
+[2025-10-01 06:02:07.455] Time for prover::norm_3: 28.76ms
+[2025-10-01 06:02:07.455] Time for verifier::verify_norm_3: 13.32µs
+number of witness rep: 1
+[2025-10-01 06:02:07.523] Time for prover::norm_2: 68.63ms
+[2025-10-01 06:02:07.523] Time for verifier::verify_norm_2: 36.00ns
+[2025-10-01 06:02:07.544] Time to complete power series: 20.28ms
+[2025-10-01 06:02:07.552] Time to compute new RHS: 8.61ms
+[2025-10-01 06:02:07.552] Time for prover::norm_3: 28.92ms
+[2025-10-01 06:02:07.552] Time for verifier::verify_norm_3: 4.21µs
+[2025-10-01 06:02:07.552] Time for sum check: 211.73ms
+[2025-10-01 06:02:07.552]  Splitting 1
+[2025-10-01 06:02:07.628]  into 131072 131072
+[2025-10-01 06:02:07.628] performing paralleld dot series 2, 131072 with 9
+[2025-10-01 06:02:07.695] performed parallel dot series in 66.851346ms
+[2025-10-01 06:02:07.695] Time for split: 142.31ms
+[2025-10-01 06:02:07.695] Verifier REPxLEN: 9x1
+[2025-10-01 06:02:07.695]   Time to extract left and right columns from RHS: 35.57µs
+[2025-10-01 06:02:07.695]   Time to compute the multiplier: 19.29µs
+[2025-10-01 06:02:07.695]   Time for row-wise tensor product: 418.01µs
+[2025-10-01 06:02:07.695]   Time verification: 127.88µs
+[2025-10-01 06:02:07.695] Verifier REPxLEN: 9x2
+[2025-10-01 06:02:07.695] Time for split verifier: 634.65µs
+[2025-10-01 06:02:07.695] Generating challenge for project with width: 512
+[2025-10-01 06:02:07.696] Time for challenge project: 1.09ms dims 512 256
+[2025-10-01 06:02:07.696] Dims of witness 2 131072
+time to project: 34.120018ms
+[2025-10-01 06:02:07.764] projected_witness 1x131072
+[2025-10-01 06:02:07.764] Time for project witness: 68.12ms
+[2025-10-01 06:02:07.764] Time for batching projections challenge: 9.27µs
+[2025-10-01 06:02:07.807] Time for batch projections: 42.91ms
+[2025-10-01 06:02:07.807] rhs dimensions: 9 x 2
+[2025-10-01 06:02:07.807] Time for verify_batching: 6.26µs
+[2025-10-01 06:02:07.807] Time for challenge fold: 14.21µs dims 2 1
+[2025-10-01 06:02:07.807] Witness REP: 2 LEN: 131072
+ncols 131072 nrows 1 inner_dim 2
+[2025-10-01 06:02:07.819] Folded witness REP: 1 LEN: 131072
+[2025-10-01 06:02:07.819] Time for fold: 11.48ms
+transpose took 122.726µs
+ncols 1 nrows 10 inner_dim 2
+[2025-10-01 06:02:07.819] Time for fold verifier: 171.20µs
+[2025-10-01 06:02:07.828] Time for send_cross_terms_before_join: 9.12ms
+[2025-10-01 06:02:07.828] Time for verifier_join: 18.41µs
+[2025-10-01 06:02:07.900]   Time to decompose witness: 70.16ms
+[2025-10-01 06:02:07.900] Power series dim 11 new_witnes dim 4 131072
+[2025-10-01 06:02:07.900]   Time to extract relevant columns from power series: 54.00ns
+[2025-10-01 06:02:08.048]   Time to compute RHS matrix: 147.62ms
+[2025-10-01 06:02:08.048] Time for decomp: 217.86ms
+[2025-10-01 06:02:08.048] Stmnt len 11, Witness  REPxLEN 4x131072  Verifier REPxLEN 11x2
+[2025-10-01 06:02:08.048] bdedecomp: 11 4
+[2025-10-01 06:02:08.048] Verifier REPxLEN: 11x4
+[2025-10-01 06:02:08.048] Time for verify_decomp: 173.49µs
+[2025-10-01 06:02:08.081] Time for prover::norm_1: 32.38ms
+[2025-10-01 06:02:08.081] Time for verifier::verify_norm_1: 53.00ns
+number of witness rep: 4
+[2025-10-01 06:02:08.205] Time for prover::norm_2: 124.66ms
+[2025-10-01 06:02:08.205] Time for verifier::verify_norm_2: 48.00ns
+[2025-10-01 06:02:08.218] Time to complete power series: 13.23ms
+[2025-10-01 06:02:08.233] Time to compute new RHS: 14.04ms
+[2025-10-01 06:02:08.233] Time for prover::norm_3: 27.31ms
+[2025-10-01 06:02:08.233] Time for verifier::verify_norm_3: 11.49µs
+number of witness rep: 4
+[2025-10-01 06:02:08.359] Time for prover::norm_2: 126.48ms
+[2025-10-01 06:02:08.359] Time for verifier::verify_norm_2: 37.00ns
+[2025-10-01 06:02:08.372] Time to complete power series: 12.75ms
+[2025-10-01 06:02:08.386] Time to compute new RHS: 14.54ms
+[2025-10-01 06:02:08.386] Time for prover::norm_3: 27.37ms
+[2025-10-01 06:02:08.387] Time for verifier::verify_norm_3: 26.60µs
+[2025-10-01 06:02:08.387] Time for sum check: 338.38ms
+[2025-10-01 06:02:08.387]  Splitting 4
+[2025-10-01 06:02:08.427]  into 65536 65536
+[2025-10-01 06:02:08.428] performing paralleld dot series 8, 65536 with 13
+[2025-10-01 06:02:08.595] performed parallel dot series in 167.319971ms
+[2025-10-01 06:02:08.595] Time for split: 208.32ms
+[2025-10-01 06:02:08.595] Verifier REPxLEN: 13x4
+[2025-10-01 06:02:08.595]   Time to extract left and right columns from RHS: 201.90µs
+[2025-10-01 06:02:08.595]   Time to compute the multiplier: 38.36µs
+[2025-10-01 06:02:08.596]   Time for row-wise tensor product: 421.33µs
+[2025-10-01 06:02:08.596]   Time verification: 208.82µs
+[2025-10-01 06:02:08.596] Verifier REPxLEN: 13x8
+[2025-10-01 06:02:08.596] Time for split verifier: 912.04µs
+[2025-10-01 06:02:08.596] Generating challenge for project with width: 2048
+[2025-10-01 06:02:08.600] Time for challenge project: 3.81ms dims 2048 256
+[2025-10-01 06:02:08.600] Dims of witness 8 65536
+time to project: 144.674482ms
+[2025-10-01 06:02:08.769] projected_witness 1x65536
+[2025-10-01 06:02:08.769] Time for project witness: 169.61ms
+[2025-10-01 06:02:08.769] Time for batching projections challenge: 5.43µs
+[2025-10-01 06:02:08.814] Time for batch projections: 44.41ms
+[2025-10-01 06:02:08.814] rhs dimensions: 13 x 8
+[2025-10-01 06:02:08.814] Time for verify_batching: 8.83µs
+[2025-10-01 06:02:08.814] Time for challenge fold: 37.74µs dims 8 1
+[2025-10-01 06:02:08.814] Witness REP: 8 LEN: 65536
+ncols 65536 nrows 1 inner_dim 8
+[2025-10-01 06:02:08.833] Folded witness REP: 1 LEN: 65536
+[2025-10-01 06:02:08.833] Time for fold: 19.22ms
+transpose took 139.594µs
+ncols 1 nrows 14 inner_dim 8
+[2025-10-01 06:02:08.833] Time for fold verifier: 294.54µs
+[2025-10-01 06:02:08.839] Time for send_cross_terms_before_join: 5.49ms
+[2025-10-01 06:02:08.839] Time for verifier_join: 26.71µs
+[2025-10-01 06:02:08.880]   Time to decompose witness: 37.49ms
+[2025-10-01 06:02:08.880] Power series dim 15 new_witnes dim 4 65536
+[2025-10-01 06:02:08.880]   Time to extract relevant columns from power series: 31.00ns
+[2025-10-01 06:02:08.978]   Time to compute RHS matrix: 98.09ms
+[2025-10-01 06:02:08.978] Time for decomp: 135.64ms
+[2025-10-01 06:02:08.978] Stmnt len 15, Witness  REPxLEN 4x65536  Verifier REPxLEN 15x2
+[2025-10-01 06:02:08.978] bdedecomp: 15 4
+[2025-10-01 06:02:08.978] Verifier REPxLEN: 15x4
+[2025-10-01 06:02:08.978] Time for verify_decomp: 233.92µs
+[2025-10-01 06:02:08.997] Time for prover::norm_1: 18.18ms
+[2025-10-01 06:02:08.997] Time for verifier::verify_norm_1: 51.00ns
+number of witness rep: 4
+[2025-10-01 06:02:09.067] Time for prover::norm_2: 70.46ms
+[2025-10-01 06:02:09.067] Time for verifier::verify_norm_2: 55.00ns
+[2025-10-01 06:02:09.075] Time to complete power series: 7.98ms
+[2025-10-01 06:02:09.083] Time to compute new RHS: 7.75ms
+[2025-10-01 06:02:09.083] Time for prover::norm_3: 15.75ms
+[2025-10-01 06:02:09.083] Time for verifier::verify_norm_3: 23.09µs
+number of witness rep: 4
+[2025-10-01 06:02:09.154] Time for prover::norm_2: 70.88ms
+[2025-10-01 06:02:09.154] Time for verifier::verify_norm_2: 38.00ns
+[2025-10-01 06:02:09.162] Time to complete power series: 8.15ms
+[2025-10-01 06:02:09.170] Time to compute new RHS: 7.77ms
+[2025-10-01 06:02:09.170] Time for prover::norm_3: 15.95ms
+[2025-10-01 06:02:09.170] Time for verifier::verify_norm_3: 11.04µs
+[2025-10-01 06:02:09.170] Time for sum check: 191.39ms
+[2025-10-01 06:02:09.170]  Splitting 4
+[2025-10-01 06:02:09.191]  into 32768 32768
+[2025-10-01 06:02:09.191] performing paralleld dot series 8, 32768 with 17
+[2025-10-01 06:02:09.328] performed parallel dot series in 137.668598ms
+[2025-10-01 06:02:09.328] Time for split: 158.46ms
+[2025-10-01 06:02:09.328] Verifier REPxLEN: 17x4
+[2025-10-01 06:02:09.329]   Time to extract left and right columns from RHS: 207.66µs
+[2025-10-01 06:02:09.329]   Time to compute the multiplier: 95.34µs
+[2025-10-01 06:02:09.329]   Time for row-wise tensor product: 339.17µs
+[2025-10-01 06:02:09.329]   Time verification: 229.56µs
+[2025-10-01 06:02:09.329] Verifier REPxLEN: 17x8
+[2025-10-01 06:02:09.329] Time for split verifier: 920.78µs
+[2025-10-01 06:02:09.329] Generating challenge for project with width: 2048
+[2025-10-01 06:02:09.333] Time for challenge project: 3.71ms dims 2048 256
+[2025-10-01 06:02:09.333] Dims of witness 8 32768
+time to project: 71.029826ms
+[2025-10-01 06:02:09.422] projected_witness 1x32768
+[2025-10-01 06:02:09.422] Time for project witness: 88.89ms
+[2025-10-01 06:02:09.422] Time for batching projections challenge: 8.70µs
+[2025-10-01 06:02:09.451] Time for batch projections: 29.27ms
+[2025-10-01 06:02:09.451] rhs dimensions: 17 x 8
+[2025-10-01 06:02:09.451] Time for verify_batching: 12.24µs
+[2025-10-01 06:02:09.451] Time for challenge fold: 44.27µs dims 8 1
+[2025-10-01 06:02:09.451] Witness REP: 8 LEN: 32768
+ncols 32768 nrows 1 inner_dim 8
+[2025-10-01 06:02:09.462] Folded witness REP: 1 LEN: 32768
+[2025-10-01 06:02:09.462] Time for fold: 11.19ms
+transpose took 154.299µs
+ncols 1 nrows 18 inner_dim 8
+[2025-10-01 06:02:09.463] Time for fold verifier: 346.29µs
+[2025-10-01 06:02:09.466] Time for send_cross_terms_before_join: 3.46ms
+[2025-10-01 06:02:09.466] Time for verifier_join: 27.15µs
+[2025-10-01 06:02:09.491]   Time to decompose witness: 22.13ms
+[2025-10-01 06:02:09.491] Power series dim 19 new_witnes dim 4 32768
+[2025-10-01 06:02:09.491]   Time to extract relevant columns from power series: 30.00ns
+[2025-10-01 06:02:09.550]   Time to compute RHS matrix: 59.47ms
+[2025-10-01 06:02:09.550] Time for decomp: 81.66ms
+[2025-10-01 06:02:09.550] Stmnt len 19, Witness  REPxLEN 4x32768  Verifier REPxLEN 19x2
+[2025-10-01 06:02:09.550] bdedecomp: 19 4
+[2025-10-01 06:02:09.550] Verifier REPxLEN: 19x4
+[2025-10-01 06:02:09.550] Time for verify_decomp: 297.19µs
+[2025-10-01 06:02:09.560] Time for prover::norm_1: 10.03ms
+[2025-10-01 06:02:09.560] Time for verifier::verify_norm_1: 56.00ns
+number of witness rep: 4
+[2025-10-01 06:02:09.600] Time for prover::norm_2: 39.62ms
+[2025-10-01 06:02:09.600] Time for verifier::verify_norm_2: 52.00ns
+[2025-10-01 06:02:09.606] Time to complete power series: 5.97ms
+[2025-10-01 06:02:09.610] Time to compute new RHS: 4.27ms
+[2025-10-01 06:02:09.610] Time for prover::norm_3: 10.27ms
+[2025-10-01 06:02:09.610] Time for verifier::verify_norm_3: 17.80µs
+number of witness rep: 4
+[2025-10-01 06:02:09.650] Time for prover::norm_2: 39.63ms
+[2025-10-01 06:02:09.650] Time for verifier::verify_norm_2: 34.00ns
+[2025-10-01 06:02:09.656] Time to complete power series: 6.16ms
+[2025-10-01 06:02:09.661] Time to compute new RHS: 4.34ms
+[2025-10-01 06:02:09.661] Time for prover::norm_3: 10.56ms
+[2025-10-01 06:02:09.661] Time for verifier::verify_norm_3: 10.25µs
+[2025-10-01 06:02:09.661] Time for sum check: 110.23ms
+[2025-10-01 06:02:09.661]  Splitting 4
+[2025-10-01 06:02:09.671]  into 16384 16384
+[2025-10-01 06:02:09.671] performing paralleld dot series 8, 16384 with 21
+[2025-10-01 06:02:09.738] performed parallel dot series in 66.516254ms
+[2025-10-01 06:02:09.738] Time for split: 76.92ms
+[2025-10-01 06:02:09.738] Verifier REPxLEN: 21x4
+[2025-10-01 06:02:09.738]   Time to extract left and right columns from RHS: 347.65µs
+[2025-10-01 06:02:09.738]   Time to compute the multiplier: 57.89µs
+[2025-10-01 06:02:09.739]   Time for row-wise tensor product: 790.20µs
+[2025-10-01 06:02:09.739]   Time verification: 310.21µs
+[2025-10-01 06:02:09.739] Verifier REPxLEN: 21x8
+[2025-10-01 06:02:09.739] Time for split verifier: 1.55ms
+[2025-10-01 06:02:09.739] Generating challenge for project with width: 2048
+[2025-10-01 06:02:09.743] Time for challenge project: 3.88ms dims 2048 256
+[2025-10-01 06:02:09.743] Dims of witness 8 16384
+time to project: 33.103784ms
+[2025-10-01 06:02:09.788] projected_witness 1x16384
+[2025-10-01 06:02:09.788] Time for project witness: 44.69ms
+[2025-10-01 06:02:09.788] Time for batching projections challenge: 4.76µs
+[2025-10-01 06:02:09.810] Time for batch projections: 22.06ms
+[2025-10-01 06:02:09.810] rhs dimensions: 21 x 8
+[2025-10-01 06:02:09.810] Time for verify_batching: 9.06µs
+[2025-10-01 06:02:09.810] Time for challenge fold: 46.47µs dims 8 1
+[2025-10-01 06:02:09.810] Witness REP: 8 LEN: 16384
+ncols 16384 nrows 1 inner_dim 8
+[2025-10-01 06:02:09.817] Folded witness REP: 1 LEN: 16384
+[2025-10-01 06:02:09.817] Time for fold: 6.72ms
+transpose took 164.459µs
+ncols 1 nrows 22 inner_dim 8
+[2025-10-01 06:02:09.817] Time for fold verifier: 386.33µs
+[2025-10-01 06:02:09.819] Time for send_cross_terms_before_join: 2.15ms
+[2025-10-01 06:02:09.819] Time for verifier_join: 25.62µs
+[2025-10-01 06:02:09.833]   Time to decompose witness: 12.73ms
+[2025-10-01 06:02:09.833] Power series dim 23 new_witnes dim 4 16384
+[2025-10-01 06:02:09.833]   Time to extract relevant columns from power series: 42.00ns
+[2025-10-01 06:02:09.871]   Time to compute RHS matrix: 37.40ms
+[2025-10-01 06:02:09.871] Time for decomp: 50.18ms
+[2025-10-01 06:02:09.871] Stmnt len 23, Witness  REPxLEN 4x16384  Verifier REPxLEN 23x2
+[2025-10-01 06:02:09.871] bdedecomp: 23 4
+[2025-10-01 06:02:09.871] Verifier REPxLEN: 23x4
+[2025-10-01 06:02:09.871] Time for verify_decomp: 393.52µs
+[2025-10-01 06:02:09.877] Time for prover::norm_1: 5.76ms
+[2025-10-01 06:02:09.877] Time for verifier::verify_norm_1: 47.00ns
+number of witness rep: 4
+[2025-10-01 06:02:09.904] Time for prover::norm_2: 26.85ms
+[2025-10-01 06:02:09.904] Time for verifier::verify_norm_2: 43.00ns
+[2025-10-01 06:02:09.908] Time to complete power series: 4.35ms
+[2025-10-01 06:02:09.911] Time to compute new RHS: 2.45ms
+[2025-10-01 06:02:09.911] Time for prover::norm_3: 6.84ms
+[2025-10-01 06:02:09.911] Time for verifier::verify_norm_3: 10.56µs
+number of witness rep: 4
+[2025-10-01 06:02:09.938] Time for prover::norm_2: 26.89ms
+[2025-10-01 06:02:09.938] Time for verifier::verify_norm_2: 36.00ns
+[2025-10-01 06:02:09.942] Time to complete power series: 4.63ms
+[2025-10-01 06:02:09.945] Time to compute new RHS: 2.53ms
+[2025-10-01 06:02:09.945] Time for prover::norm_3: 7.19ms
+[2025-10-01 06:02:09.945] Time for verifier::verify_norm_3: 10.25µs
+[2025-10-01 06:02:09.945] Time for sum check: 73.66ms
+[2025-10-01 06:02:09.945]  Splitting 4
+[2025-10-01 06:02:09.950]  into 8192 8192
+[2025-10-01 06:02:09.950] performing paralleld dot series 8, 8192 with 25
+[2025-10-01 06:02:09.989] performed parallel dot series in 38.389547ms
+[2025-10-01 06:02:09.989] Time for split: 44.00ms
+[2025-10-01 06:02:09.989] Verifier REPxLEN: 25x4
+[2025-10-01 06:02:09.989]   Time to extract left and right columns from RHS: 275.71µs
+[2025-10-01 06:02:09.989]   Time to compute the multiplier: 59.36µs
+[2025-10-01 06:02:09.990]   Time for row-wise tensor product: 473.70µs
+[2025-10-01 06:02:09.990]   Time verification: 366.08µs
+[2025-10-01 06:02:09.990] Verifier REPxLEN: 25x8
+[2025-10-01 06:02:09.990] Time for split verifier: 1.23ms
+[2025-10-01 06:02:09.990] Generating challenge for project with width: 2048
+[2025-10-01 06:02:09.993] Time for challenge project: 3.41ms dims 2048 256
+[2025-10-01 06:02:09.993] Dims of witness 8 8192
+time to project: 15.627868ms
+[2025-10-01 06:02:10.017] projected_witness 1x8192
+[2025-10-01 06:02:10.017] Time for project witness: 23.97ms
+[2025-10-01 06:02:10.017] Time for batching projections challenge: 4.52µs
+[2025-10-01 06:02:10.036] Time for batch projections: 18.30ms
+[2025-10-01 06:02:10.036] rhs dimensions: 25 x 8
+[2025-10-01 06:02:10.036] Time for verify_batching: 7.10µs
+[2025-10-01 06:02:10.036] Time for challenge fold: 49.60µs dims 8 1
+[2025-10-01 06:02:10.036] Witness REP: 8 LEN: 8192
+ncols 8192 nrows 1 inner_dim 8
+[2025-10-01 06:02:10.040] Folded witness REP: 1 LEN: 8192
+[2025-10-01 06:02:10.040] Time for fold: 3.96ms
+transpose took 69.617µs
+ncols 1 nrows 26 inner_dim 8
+[2025-10-01 06:02:10.040] Time for fold verifier: 368.76µs
+[2025-10-01 06:02:10.042] Time for send_cross_terms_before_join: 1.57ms
+[2025-10-01 06:02:10.042] Time for verifier_join: 27.29µs
+[2025-10-01 06:02:10.051]   Time to decompose witness: 8.52ms
+[2025-10-01 06:02:10.051] Power series dim 27 new_witnes dim 4 8192
+[2025-10-01 06:02:10.051]   Time to extract relevant columns from power series: 46.00ns
+[2025-10-01 06:02:10.074]   Time to compute RHS matrix: 22.44ms
+[2025-10-01 06:02:10.074] Time for decomp: 30.98ms
+[2025-10-01 06:02:10.074] Stmnt len 27, Witness  REPxLEN 4x8192  Verifier REPxLEN 27x2
+[2025-10-01 06:02:10.074] bdedecomp: 27 4
+[2025-10-01 06:02:10.074] Verifier REPxLEN: 27x4
+[2025-10-01 06:02:10.074] Time for verify_decomp: 560.69µs
+[2025-10-01 06:02:10.078] Time for prover::norm_1: 3.49ms
+[2025-10-01 06:02:10.078] Time for verifier::verify_norm_1: 43.00ns
+number of witness rep: 4
+[2025-10-01 06:02:10.094] Time for prover::norm_2: 15.87ms
+[2025-10-01 06:02:10.094] Time for verifier::verify_norm_2: 495.00ns
+[2025-10-01 06:02:10.097] Time to complete power series: 3.45ms
+[2025-10-01 06:02:10.099] Time to compute new RHS: 1.51ms
+[2025-10-01 06:02:10.099] Time for prover::norm_3: 4.98ms
+[2025-10-01 06:02:10.099] Time for verifier::verify_norm_3: 13.92µs
+number of witness rep: 4
+[2025-10-01 06:02:10.115] Time for prover::norm_2: 16.02ms
+[2025-10-01 06:02:10.115] Time for verifier::verify_norm_2: 47.00ns
+[2025-10-01 06:02:10.119] Time to complete power series: 3.80ms
+[2025-10-01 06:02:10.120] Time to compute new RHS: 1.48ms
+[2025-10-01 06:02:10.120] Time for prover::norm_3: 5.30ms
+[2025-10-01 06:02:10.120] Time for verifier::verify_norm_3: 21.29µs
+[2025-10-01 06:02:10.120] Time for sum check: 45.77ms
+[2025-10-01 06:02:10.120]  Splitting 4
+[2025-10-01 06:02:10.123]  into 4096 4096
+[2025-10-01 06:02:10.123] performing paralleld dot series 8, 4096 with 29
+[2025-10-01 06:02:10.148] performed parallel dot series in 24.766404ms
+[2025-10-01 06:02:10.148] Time for split: 27.70ms
+[2025-10-01 06:02:10.148] Verifier REPxLEN: 29x4
+[2025-10-01 06:02:10.148]   Time to extract left and right columns from RHS: 276.69µs
+[2025-10-01 06:02:10.148]   Time to compute the multiplier: 70.08µs
+[2025-10-01 06:02:10.149]   Time for row-wise tensor product: 374.78µs
+[2025-10-01 06:02:10.149]   Time verification: 319.96µs
+[2025-10-01 06:02:10.149] Verifier REPxLEN: 29x8
+[2025-10-01 06:02:10.149] Time for split verifier: 1.09ms
+[2025-10-01 06:02:10.149] Generating challenge for project with width: 2048
+[2025-10-01 06:02:10.152] Time for challenge project: 3.27ms dims 2048 256
+[2025-10-01 06:02:10.152] Dims of witness 8 4096
+time to project: 7.951823ms
+[2025-10-01 06:02:10.165] projected_witness 1x4096
+[2025-10-01 06:02:10.165] Time for project witness: 13.01ms
+[2025-10-01 06:02:10.165] Time for batching projections challenge: 9.83µs
+[2025-10-01 06:02:10.182] Time for batch projections: 16.71ms
+[2025-10-01 06:02:10.182] rhs dimensions: 29 x 8
+[2025-10-01 06:02:10.182] Time for verify_batching: 12.41µs
+[2025-10-01 06:02:10.182] Time for challenge fold: 49.24µs dims 8 1
+[2025-10-01 06:02:10.182] Witness REP: 8 LEN: 4096
+ncols 4096 nrows 1 inner_dim 8
+[2025-10-01 06:02:10.183] Folded witness REP: 1 LEN: 4096
+[2025-10-01 06:02:10.183] Time for fold: 1.33ms
+transpose took 24.154µs
+ncols 1 nrows 30 inner_dim 8
+[2025-10-01 06:02:10.184] Time for fold verifier: 380.17µs
+[2025-10-01 06:02:10.185] Time for send_cross_terms_before_join: 1.17ms
+[2025-10-01 06:02:10.185] Time for verifier_join: 29.75µs
+[2025-10-01 06:02:10.190]   Time to decompose witness: 4.49ms
+[2025-10-01 06:02:10.190] Power series dim 31 new_witnes dim 4 4096
+[2025-10-01 06:02:10.190]   Time to extract relevant columns from power series: 37.00ns
+[2025-10-01 06:02:10.204]   Time to compute RHS matrix: 14.03ms
+[2025-10-01 06:02:10.204] Time for decomp: 18.56ms
+[2025-10-01 06:02:10.204] Stmnt len 31, Witness  REPxLEN 4x4096  Verifier REPxLEN 31x2
+[2025-10-01 06:02:10.204] bdedecomp: 31 4
+[2025-10-01 06:02:10.204] Verifier REPxLEN: 31x4
+[2025-10-01 06:02:10.204] Time for verify_decomp: 385.35µs
+[2025-10-01 06:02:10.205] Time for prover::norm_1: 1.31ms
+[2025-10-01 06:02:10.205] Time for verifier::verify_norm_1: 43.00ns
+number of witness rep: 4
+[2025-10-01 06:02:10.215] Time for prover::norm_2: 9.15ms
+[2025-10-01 06:02:10.215] Time for verifier::verify_norm_2: 41.00ns
+[2025-10-01 06:02:10.216] Time to complete power series: 1.75ms
+[2025-10-01 06:02:10.217] Time to compute new RHS: 835.24µs
+[2025-10-01 06:02:10.217] Time for prover::norm_3: 2.61ms
+[2025-10-01 06:02:10.217] Time for verifier::verify_norm_3: 13.48µs
+number of witness rep: 4
+[2025-10-01 06:02:10.230] Time for prover::norm_2: 12.49ms
+[2025-10-01 06:02:10.230] Time for verifier::verify_norm_2: 17.00ns
+[2025-10-01 06:02:10.232] Time to complete power series: 1.94ms
+[2025-10-01 06:02:10.233] Time to compute new RHS: 924.92µs
+[2025-10-01 06:02:10.233] Time for prover::norm_3: 2.89ms
+[2025-10-01 06:02:10.233] Time for verifier::verify_norm_3: 9.96µs
+[2025-10-01 06:02:10.233] Time for sum check: 28.52ms
+[2025-10-01 06:02:10.233]  Splitting 4
+[2025-10-01 06:02:10.234]  into 2048 2048
+[2025-10-01 06:02:10.234] performing paralleld dot series 8, 2048 with 33
+[2025-10-01 06:02:10.248] performed parallel dot series in 13.874578ms
+[2025-10-01 06:02:10.248] Time for split: 15.51ms
+[2025-10-01 06:02:10.248] Verifier REPxLEN: 33x4
+[2025-10-01 06:02:10.249]   Time to extract left and right columns from RHS: 546.41µs
+[2025-10-01 06:02:10.249]   Time to compute the multiplier: 32.92µs
+[2025-10-01 06:02:10.249]   Time for row-wise tensor product: 576.84µs
+[2025-10-01 06:02:10.250]   Time verification: 391.36µs
+[2025-10-01 06:02:10.250] Verifier REPxLEN: 33x8
+[2025-10-01 06:02:10.250] Time for split verifier: 1.61ms
+[2025-10-01 06:02:10.250] Generating challenge for project with width: 2048
+[2025-10-01 06:02:10.253] Time for challenge project: 3.20ms dims 2048 256
+[2025-10-01 06:02:10.253] Dims of witness 8 2048
+time to project: 3.620395ms
+[2025-10-01 06:02:10.260] projected_witness 1x2048
+[2025-10-01 06:02:10.260] Time for project witness: 6.89ms
+[2025-10-01 06:02:10.260] Time for batching projections challenge: 4.48µs
+[2025-10-01 06:02:10.270] Time for batch projections: 10.25ms
+[2025-10-01 06:02:10.270] rhs dimensions: 33 x 8
+[2025-10-01 06:02:10.270] Time for verify_batching: 13.84µs
+[2025-10-01 06:02:10.270] Time for challenge fold: 42.83µs dims 8 1
+[2025-10-01 06:02:10.270] Witness REP: 8 LEN: 2048
+ncols 2048 nrows 1 inner_dim 8
+[2025-10-01 06:02:10.271] Folded witness REP: 1 LEN: 2048
+[2025-10-01 06:02:10.271] Time for fold: 573.62µs
+transpose took 62.367µs
+ncols 1 nrows 34 inner_dim 8
+[2025-10-01 06:02:10.271] Time for fold verifier: 449.49µs
+[2025-10-01 06:02:10.272] Time for send_cross_terms_before_join: 823.34µs
+[2025-10-01 06:02:10.272] Time for verifier_join: 30.53µs
+[2025-10-01 06:02:10.272] Final dim st 35, wrow 2 wcol 2048 vfrow 35 vfcol 2
+[2025-10-01 06:02:10.277] Time for final assert_eq: 4.54ms
+[2025-10-01 06:02:10.277] PRV: 2.94s
+[2025-10-01 06:02:10.277] VER: 32.13ms
+t_norm_check_1: 89.31ms
+t_norm_check_2: 714.76ms
+t_norm_check_3: 194.70ms
+t_split: 673.21ms
+t_projection: 621.49ms
+t_fold: 78.27ms
+t_decomp: 534.88ms
