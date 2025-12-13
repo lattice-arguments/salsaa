@@ -1,4 +1,3 @@
-use rayon::prelude::*;
 use std::time::{Duration, Instant};
 
 use crate::{
@@ -8,8 +7,8 @@ use crate::{
         crs::CRS,
         decomp::{decomp_ell, verify_decomp},
         fast_norm_check::{
-            make_verify_norm_check_2_wrapped, norm_check_1, norm_check_2, norm_check_3,
-            verify_norm_check_1, verify_norm_check_3, SumCheckProverState,
+            norm_check_1, norm_check_2, norm_check_3, verify_norm_check_1, verify_norm_check_3,
+            SumCheckProverState,
         },
         fold::{challenge_for_fold, fold, verifier_fold},
         project::{
@@ -202,7 +201,7 @@ pub fn protocol<const MOD_Q: u64, const N: usize>() {
         let now = Instant::now();
         let (claims, flattened) = norm_check_1::<MOD_Q, N>(&witness);
         let sum_check_prover_state = SumCheckProverState {
-            flattened_witness: flattened.par_iter().enumerate(),
+            flattened_witness: flattened,
         };
         let elapsed = now.elapsed();
         println_with_timestamp!("Time for prover::norm_1: {:.2?}", elapsed);
@@ -210,22 +209,19 @@ pub fn protocol<const MOD_Q: u64, const N: usize>() {
         t_norm_check_1 += elapsed;
 
         let now = Instant::now();
-        let sumcheck_verifier_state = verify_norm_check_1::<MOD_Q, N>(claims);
+        let mut sumcheck_verifier_state = verify_norm_check_1::<MOD_Q, N>(claims);
         let elapsed = now.elapsed();
         println_with_timestamp!("Time for verifier::verify_norm_1: {:.2?}", elapsed);
         verifier_runtime = verifier_runtime + elapsed;
 
         // Amplification
+        let mut sum_check_prover_state = sum_check_prover_state.clone();
         for _ in 0..2 {
+            sumcheck_verifier_state = sumcheck_verifier_state.clone();
             let now = Instant::now();
-            let sum_check_prover_state = sum_check_prover_state.clone();
-
-            let (sumcheck_verifier_state, inner_verifier_runtime, verify_norm_check_2) =
-                make_verify_norm_check_2_wrapped(&verifier_state, sumcheck_verifier_state.clone());
-
-            norm_check_2::<MOD_Q, N>(sum_check_prover_state, verify_norm_check_2);
+            let inner_verifier_runtime =
+                norm_check_2::<MOD_Q, N>(&mut sum_check_prover_state, &mut sumcheck_verifier_state);
             let elapsed = now.elapsed();
-            let inner_verifier_runtime = *inner_verifier_runtime.lock();
             println_with_timestamp!("Time for prover::norm_2: {:.2?}", elapsed);
             println_with_timestamp!(
                 "Time for verifier::verify_norm_2: {:.2?}",
@@ -236,8 +232,9 @@ pub fn protocol<const MOD_Q: u64, const N: usize>() {
             verifier_runtime = verifier_runtime + inner_verifier_runtime;
 
             let now = Instant::now();
+
             let rhs = norm_check_3::<MOD_Q, N>(
-                &sumcheck_verifier_state.lock().cs,
+                &sumcheck_verifier_state.clone().cs,
                 &mut statement,
                 &witness,
             );
@@ -247,8 +244,7 @@ pub fn protocol<const MOD_Q: u64, const N: usize>() {
             t_norm_check_3 += elapsed;
 
             let now = Instant::now();
-            let mut sumcheckstate = sumcheck_verifier_state.lock();
-            verify_norm_check_3::<MOD_Q, N>(rhs, &mut sumcheckstate, &mut verifier_state);
+            verify_norm_check_3::<MOD_Q, N>(rhs, &mut sumcheck_verifier_state, &mut verifier_state);
             let elapsed = now.elapsed();
             println_with_timestamp!("Time for verifier::verify_norm_3: {:.2?}", elapsed);
             verifier_runtime = verifier_runtime + elapsed;
@@ -260,8 +256,7 @@ pub fn protocol<const MOD_Q: u64, const N: usize>() {
         if SNARK {
             let now = Instant::now();
 
-            let (new_witness, split_output) =
-                split::<MOD_Q, N>(&mut statement, witness.into_par_iter());
+            let (new_witness, split_output) = split::<MOD_Q, N>(&mut statement, witness);
             witness = new_witness;
             let elapsed = now.elapsed();
             t_split += elapsed;
@@ -323,13 +318,16 @@ pub fn protocol<const MOD_Q: u64, const N: usize>() {
         verifier_runtime = verifier_runtime + elapsed;
 
         let now = Instant::now();
-        let (projected_lhs, projection_rhs, witness_rhs) = batch_projections::<MOD_Q, N>(
-            &projected_witness,
-            &witness,
-            &challenge,
-            batching_projections_challenge,
-            &mut statement,
-        );
+        let (projected_lhs, projection_rhs, witness_rhs, inner_verifier_runtime) =
+            batch_projections::<MOD_Q, N>(
+                &projected_witness,
+                &witness,
+                &challenge,
+                batching_projections_challenge,
+                &mut statement,
+            );
+        verifier_runtime = verifier_runtime + inner_verifier_runtime;
+
         let elapsed = now.elapsed();
         println_with_timestamp!("Time for batch projections: {:.2?}", elapsed);
         prover_runtime = prover_runtime + elapsed;

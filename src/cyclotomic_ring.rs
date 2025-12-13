@@ -613,7 +613,8 @@ mod tests {
     const N: usize = 32;
     #[test]
     fn test_get_powers_root() {
-        let (_translation_factors, _translation_factors_inv) = get_roots_of_unity_trans::<MOD_Q, N>();
+        let (_translation_factors, _translation_factors_inv) =
+            get_roots_of_unity_trans::<MOD_Q, N>();
         let mut ex = CyclotomicRing::<MOD_Q, N>::random();
         ex.to_incomplete_ntt_representation();
         let ex_0 = incomplete_ntt_multiplication(&mut (ex.clone()), &mut ex, true);

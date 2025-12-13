@@ -2,7 +2,6 @@ use crate::{
     arithmetic::{sample_random_vector, PowerSeries},
     cyclotomic_ring::CyclotomicRing,
 };
-use rayon::prelude::*;
 
 /// Struct representing the Common Reference String (CRS) for cryptographic operations.
 pub struct CRS<const MOD_Q: u64, const N: usize> {
@@ -45,7 +44,7 @@ pub fn compute_commitment_keys<const MOD_Q: u64, const N: usize>(
     wit_dim: usize,
 ) -> Vec<PowerSeries<MOD_Q, N>> {
     module
-        .into_par_iter()
+        .into_iter()
         .map(|mut m| {
             let mut row = Vec::with_capacity(wit_dim);
             let mut power = m.clone();

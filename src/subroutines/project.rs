@@ -1,7 +1,6 @@
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use num_traits::Zero;
-use rayon::prelude::*;
 
 use crate::{
     arithmetic::{
@@ -60,7 +59,7 @@ pub fn project<const MOD_Q: u64, const N: usize>(
         panic!("Chunk width is greater than witness width");
     }
 
-    let indices: Vec<_> = (0..witness.len())
+    let indices: Vec<(usize, usize)> = (0..witness.len())
         .flat_map(|i| (0..witness[i].len() / chunk_width).map(move |j| (i, j)))
         .collect();
 
@@ -69,31 +68,33 @@ pub fn project<const MOD_Q: u64, const N: usize>(
     unsafe { projected_witness.set_len(indices.len() * HEIGHT) };
 
     let time = Instant::now();
-    projected_witness
-        .par_chunks_mut(HEIGHT)
-        .enumerate()
-        .for_each(|(idx, chunk)| {
-            let (i, j) = indices[idx];
-            let row_chunk = &witness[i][j * chunk_width..(j + 1) * chunk_width];
 
-            chunk.par_iter_mut().enumerate().for_each(|(k, slot)| {
-                let mut positive_sum = CyclotomicRing::<MOD_Q, N>::zero();
-                let mut negative_sum = CyclotomicRing::<MOD_Q, N>::zero();
+    for (idx, (i, j)) in indices.iter().copied().enumerate() {
+        let row_chunk = &witness[i][j * chunk_width..(j + 1) * chunk_width];
 
-                for l in 0..chunk_width {
-                    if !challenge.is_zero[k][l] {
-                        if challenge.sign[k][l] {
-                            add_no_reduction(&mut positive_sum, &row_chunk[l]);
-                        } else {
-                            add_no_reduction(&mut negative_sum, &row_chunk[l]);
-                        }
+        let base = idx * HEIGHT;
+
+        for k in 0..HEIGHT {
+            let mut positive_sum = CyclotomicRing::<MOD_Q, N>::zero();
+            let mut negative_sum = CyclotomicRing::<MOD_Q, N>::zero();
+
+            for l in 0..chunk_width {
+                if !challenge.is_zero[k][l] {
+                    if challenge.sign[k][l] {
+                        add_no_reduction(&mut positive_sum, &row_chunk[l]);
+                    } else {
+                        add_no_reduction(&mut negative_sum, &row_chunk[l]);
                     }
                 }
-                reduce(&mut positive_sum);
-                reduce(&mut negative_sum);
-                *slot = positive_sum - negative_sum;
-            });
-        });
+            }
+
+            reduce(&mut positive_sum);
+            reduce(&mut negative_sum);
+
+            projected_witness[base + k] = positive_sum - negative_sum;
+        }
+    }
+
     println!("time to project: {:?}", time.elapsed());
 
     let projected_witness_matrix = vec![projected_witness];
@@ -142,32 +143,32 @@ pub fn batch_projections<const MOD_Q: u64, const N: usize>(
     PowerSeries<MOD_Q, N>,
     Vec<CyclotomicRing<MOD_Q, N>>,
     Vec<CyclotomicRing<MOD_Q, N>>,
+    Duration,
 ) {
+    let now = Instant::now();
     let chunk_width = witness.len() * HEIGHT;
     let c_0_consecutive_powers = consecutive_powers::<MOD_Q, N>(challenge.0, HEIGHT);
-
-    // Pre-allocate cj
     let mut cj = Vec::with_capacity(chunk_width);
     unsafe {
         cj.set_len(chunk_width);
     }
 
-    cj.par_iter_mut().enumerate().for_each(|(j, cj_j)| {
-        let acc = c_0_consecutive_powers
-            .par_iter()
-            .enumerate()
-            .filter(|(i, _)| !projection_challenge.is_zero[*i][j])
-            .map(|(i, power)| {
-                if projection_challenge.sign[i][j] {
-                    *power
-                } else {
-                    -power
-                }
-            })
-            .reduce(|| CyclotomicRing::<MOD_Q, N>::zero(), |a, b| a + b);
+    for j in 0..chunk_width {
+        let mut acc = CyclotomicRing::<MOD_Q, N>::zero();
 
-        *cj_j = acc;
-    });
+        for i in 0..c_0_consecutive_powers.len() {
+            if !projection_challenge.is_zero[i][j] {
+                if projection_challenge.sign[i][j] {
+                    acc = acc + c_0_consecutive_powers[i];
+                } else {
+                    acc = acc - c_0_consecutive_powers[i];
+                }
+            }
+        }
+
+        cj[j] = acc;
+    }
+    let verifier_runtime = now.elapsed();
 
     let nof_tensor_layers = (witness[0].len() / chunk_width).ilog2() as usize;
     let nof_tensor_layers_projection = nof_tensor_layers + witness.len().ilog2() as usize;
@@ -195,7 +196,7 @@ pub fn batch_projections<const MOD_Q: u64, const N: usize>(
 
     power_series.push(witness_lhs);
 
-    (projected_lhs, projection_rhs, witness_rhs)
+    (projected_lhs, projection_rhs, witness_rhs, verifier_runtime)
 }
 
 pub fn verify_batching<const MOD_Q: u64, const N: usize>(

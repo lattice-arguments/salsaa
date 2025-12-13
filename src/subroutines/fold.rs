@@ -1,6 +1,4 @@
-use crate::arithmetic::{
-    parallel_dot_matrix_matrix, sample_random_biased_mat, transpose,
-};
+use crate::arithmetic::{parallel_dot_matrix_matrix, sample_random_biased_mat, transpose};
 use crate::cyclotomic_ring::CyclotomicRing;
 use crate::subroutines::split::VerifierState;
 

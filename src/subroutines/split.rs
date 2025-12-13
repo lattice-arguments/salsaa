@@ -6,7 +6,6 @@ use crate::arithmetic::{
 };
 use crate::cyclotomic_ring::CyclotomicRing;
 use crate::helpers::println_with_timestamp;
-use rayon::prelude::*;
 
 /// Splits the provided vector into three parts: L (left), C (center), and R (right).
 ///
@@ -44,12 +43,12 @@ pub struct SplitOutput<const MOD_Q: u64, const N: usize> {
 /// A `SplitOutput` containing the new RHS, witness center, and new witness matrices.
 pub fn split<const MOD_Q: u64, const N: usize>(
     power_series: &Vec<PowerSeries<MOD_Q, N>>,
-    witness: rayon::vec::IntoIter<Vec<CyclotomicRing<MOD_Q, N>>>,
+    witness: Vec<Vec<CyclotomicRing<MOD_Q, N>>>,
 ) -> (Vec<Vec<CyclotomicRing<MOD_Q, N>>>, SplitOutput<MOD_Q, N>) {
     println_with_timestamp!(" Splitting {:?}", witness.len());
 
     let (witness_split_l, mut witness_split_r): (Vec<_>, Vec<_>) =
-        witness.map(|w| split_vec(w, 1)).unzip();
+        witness.into_iter().map(|w| split_vec(w, 1)).unzip();
 
     println_with_timestamp!(
         " into {:?} {:?}",
@@ -98,7 +97,7 @@ pub fn split<const MOD_Q: u64, const N: usize>(
 mod tests {
     use crate::{
         arithmetic::{
-            map_matrix_to_prime_ring, map_vector_to_prime_ring, matrix_to_incomplete_ntt
+            map_matrix_to_prime_ring, map_vector_to_prime_ring, matrix_to_incomplete_ntt,
         },
         subroutines::crs::CRS,
     };
@@ -118,9 +117,7 @@ mod tests {
             tensors: map_matrix_to_prime_ring(vec![vec![1, 16], vec![1, 4], vec![1, 2]]),
         }];
 
-        let witness = vec![map_vector_to_prime_ring(vec![
-            1, 2, 3, 4, 5, 6, 7, 8,
-        ])];
+        let witness = vec![map_vector_to_prime_ring(vec![1, 2, 3, 4, 5, 6, 7, 8])];
 
         let mut rhs = vec![map_vector_to_prime_ring(vec![1793])];
         rhs[0][0].to_incomplete_ntt_representation();

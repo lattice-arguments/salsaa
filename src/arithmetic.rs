@@ -1,9 +1,8 @@
 use crate::{
-    cyclotomic_ring::{CyclotomicRing, Representation},
-    hexl::bindings,
+    cyclotomic_ring::{incomplete_ntt_multiplication, CyclotomicRing, Representation},
+    hexl::bindings::{self, eltwise_add_mod},
 };
 use num_traits::Zero;
-use rayon::prelude::*;
 use std::cmp::max;
 use std::simd::cmp::SimdPartialOrd;
 use std::simd::*;
@@ -11,8 +10,6 @@ use std::{
     iter::Sum,
     ops::{Add, Mul},
 };
-
-pub const MAX_THREADS: usize = 120;
 
 #[cfg(target_feature = "avx512f")]
 #[inline]
@@ -208,8 +205,8 @@ pub fn matrix_to_incomplete_ntt<const MOD_Q: u64, const N: usize>(
 pub fn matrix_to_coeff<const MOD_Q: u64, const N: usize>(
     matrix: &mut Vec<Vec<CyclotomicRing<MOD_Q, N>>>,
 ) {
-    matrix.into_par_iter().for_each(|row| {
-        row.into_par_iter().for_each(|cyclotomic_elem| {
+    matrix.into_iter().for_each(|row| {
+        row.into_iter().for_each(|cyclotomic_elem| {
             cyclotomic_elem.to_coeff_representation();
         })
     })
@@ -259,7 +256,7 @@ where
     );
 
     (0..matrix[0].len())
-        .into_par_iter()
+        .into_iter()
         .map(|col| {
             matrix
                 .iter()
@@ -313,7 +310,7 @@ where
 //     );
 
 //     matrix
-//         .par_iter()
+//         .iter()
 //         .map(|row| {
 //             row.iter()
 //                 .zip(vector.iter())
@@ -384,7 +381,7 @@ where
 // where
 //     T: Mul<Output = T> + Zero + Copy + Send + Sync + Add<Output = T>,
 // {
-//     vector.par_iter().map(|x| *x * *ell).collect()
+//     vector.iter().map(|x| *x * *ell).collect()
 // }
 
 // #[test]
@@ -425,7 +422,6 @@ where
 //     assert_eq!(result, vec![0, 0, 0]);
 // }
 
-
 pub fn parallel_dot_matrix_matrix<T>(matrix_a: Vec<Vec<T>>, matrix_b: &Vec<Vec<T>>) -> Vec<Vec<T>>
 where
     T: Mul<Output = T> + Zero + Copy + Send + Sync + Add<Output = T> + Sum,
@@ -449,7 +445,7 @@ where
         .map(|j| {
             let b_row = &matrix_b[j];
             (0..ncols)
-                .into_par_iter()
+                .into_iter()
                 .map(|i| (0..inner_dim).map(|k| matrix_a[k][i] * b_row[k]).sum())
                 .collect::<Vec<T>>()
         })
@@ -464,16 +460,23 @@ pub fn parallel_dot_series_matrix<const MOD_Q: u64, const N: usize>(
     let inner_dim = matrix_b.len();
 
     let extracted_rows: Vec<&[CyclotomicRing<MOD_Q, N>]> = matrix_a
-        .par_iter()
+        .iter()
         .map(|series| {
             series
                 .expanded_layers
-                .par_iter()
-                .find_first(|layer| layer.len() == ncols)
+                .iter()
+                .find(|layer| layer.len() == ncols)
                 .expect("No matching layer found")
                 .as_slice()
         })
         .collect();
+
+    //dbg!(&extracted_rows);
+    let mut matrix_b_t: Vec<Vec<CyclotomicRing<MOD_Q, N>>> =
+        vec![Vec::with_capacity(ncols); inner_dim];
+    for k in 0..inner_dim {
+        matrix_b_t[k].extend_from_slice(&matrix_b[k]);
+    }
 
     // Pre allocate a result matrix skipping zero-initialization
     let mut result: Vec<Vec<CyclotomicRing<MOD_Q, N>>> = (0..extracted_rows.len())
@@ -487,19 +490,28 @@ pub fn parallel_dot_series_matrix<const MOD_Q: u64, const N: usize>(
         })
         .collect();
 
-    result.par_iter_mut().enumerate().for_each(|(j, row_res)| {
-        let row = extracted_rows[j];
+    for j in 0..extracted_rows.len() {
+        let mut row_res: Vec<CyclotomicRing<MOD_Q, N>> = Vec::with_capacity(inner_dim);
+        unsafe {
+            row_res.set_len(inner_dim);
+        }
 
-        row_res.par_iter_mut().enumerate().for_each(|(k, res)| {
-            *res = (0..ncols)
-                .into_par_iter()
-                .fold(
-                    || CyclotomicRing::zero(),
-                    |acc, i| acc + row[i] * matrix_b[k][i],
-                )
-                .sum()
-        });
-    });
+        for k in 0..inner_dim {
+            row_res[k] = CyclotomicRing::<MOD_Q, N>::zero();
+        }
+
+        let row_a = extracted_rows[j];
+
+        for i in 0..ncols {
+            let a = &row_a[i];
+            for k in 0..inner_dim {
+                let mul = *a * matrix_b[k][i];
+                row_res[k] = row_res[k] + mul;
+            }
+        }
+
+        result[j] = row_res;
+    }
 
     result
 }
@@ -525,11 +537,10 @@ pub fn parallel_dot_single_series_matrix<const MOD_Q: u64, const N: usize>(
         result.set_len(inner_dim);
     }
 
-    result.par_iter_mut().enumerate().for_each(|(j, res)| {
+    result.iter_mut().enumerate().for_each(|(j, res)| {
         *res = (0..len)
-            .into_par_iter()
             .map(|i| row_a[i] * matrix[j][i])
-            .reduce(CyclotomicRing::zero, |a, b| a + b);
+            .fold(CyclotomicRing::zero(), |a, b| a + b);
     });
 
     result
@@ -623,7 +634,7 @@ where
     let mut transposed = vec![vec![T::zero(); rows]; cols];
 
     // Transpose using parallel iteration
-    transposed.par_iter_mut().enumerate().for_each(|(i, row)| {
+    transposed.iter_mut().enumerate().for_each(|(i, row)| {
         for (j, value) in row.iter_mut().enumerate() {
             *value = matrix[j][i];
         }
@@ -833,10 +844,10 @@ where
     let num_rows = a.len();
     let mut result = Vec::with_capacity(num_rows);
 
-    result.par_extend(a.par_iter().enumerate().map(|(i, row_a)| {
+    result.extend(a.iter().enumerate().map(|(i, row_a)| {
         row_a
-            .par_iter()
-            .flat_map(|&elem_a| b.par_iter().map(move |row_b_t| elem_a * row_b_t[i]))
+            .iter()
+            .flat_map(|&elem_a| b.iter().map(move |row_b_t| elem_a * row_b_t[i]))
             .collect()
     }));
     result
@@ -854,7 +865,7 @@ where
         result.set_len(a_len * b_len);
     }
 
-    result.par_iter_mut().enumerate().for_each(|(idx, elem)| {
+    result.iter_mut().enumerate().for_each(|(idx, elem)| {
         let i = idx / b_len;
         let j = idx % b_len;
         *elem = a[i] * b[j];
@@ -942,7 +953,7 @@ where
 
     let mut result = vec![vec![T::zero(); ncols]; nrows];
 
-    result.par_iter_mut().enumerate().for_each(|(i, row)| {
+    result.iter_mut().enumerate().for_each(|(i, row)| {
         for j in 0..ncols {
             row[j] = matrix_a[i][j] + matrix_b[i][j];
         }
@@ -951,35 +962,26 @@ where
     result
 }
 
-// Add two matrices from their iterators, transposing the result
-pub fn add_matrices_transposed<'a, const MOD_Q: u64, const N: usize>(
-    matrix_a: impl ParallelIterator<Item = Vec<CyclotomicRing<MOD_Q, N>>>
-        + IndexedParallelIterator
-        + 'a
-        + Clone,
-    matrix_b: impl ParallelIterator<Item = Vec<CyclotomicRing<MOD_Q, N>>>
-        + IndexedParallelIterator
-        + 'a
-        + Clone,
+pub fn add_matrices_transposed<const MOD_Q: u64, const N: usize>(
+    matrix_a: &[Vec<CyclotomicRing<MOD_Q, N>>],
+    matrix_b: &[Vec<CyclotomicRing<MOD_Q, N>>],
 ) -> Vec<Vec<CyclotomicRing<MOD_Q, N>>> {
-    let first_col = matrix_a
-        .clone()
-        .find_first(|_| true)
-        .expect("matrix_a is empty");
-    let nrows = first_col.len();
+    let ncols = matrix_a.len();
+    assert!(ncols > 0, "matrix_a is empty");
 
-    let zipped_cols = matrix_a.zip(matrix_b);
+    let nrows = matrix_a[0].len();
+    assert!(
+        matrix_b.len() == ncols && matrix_b[0].len() == nrows,
+        "matrix dimensions do not match"
+    );
 
     (0..nrows)
-        .into_iter()
-        .map(move |row_idx| {
-            zipped_cols
-                .clone()
-                .into_par_iter()
-                .map(|(col_a, col_b)| col_a[row_idx] + col_b[row_idx])
+        .map(|row_idx| {
+            (0..ncols)
+                .map(|col_idx| matrix_a[col_idx][row_idx] + matrix_b[col_idx][row_idx])
                 .collect::<Vec<_>>()
         })
-        .collect()
+        .collect::<Vec<_>>()
 }
 
 // /// Adds corresponding elements of two vectors and returns the result as a new vector.
@@ -1437,8 +1439,8 @@ pub fn compute_hp_power_series<const MOD_Q: u64, const N: usize>(
 // pub fn ring_inner_product(a: &Vec<DPrimeRingElement<>>, b: &Vec<DPrimeRingElement>) -> DPrimeRingElement {
 //     assert_eq!(a.len(), b.len(), "Input vectors must have the same length");
 
-//     a.par_iter()
-//         .zip(b.par_iter())
+//     a.iter()
+//         .zip(b.iter())
 //         .map(|(a_i, b_i)| *a_i * *b_i)
 //         .reduce(DPrimeRingElement::zero, |acc, prod| acc + prod)
 // }
@@ -1459,36 +1461,23 @@ pub fn compute_hp_power_series<const MOD_Q: u64, const N: usize>(
 // // RNS: assume small elements.
 
 fn determine_bit_width<const MOD_Q: u64, const N: usize>(
-    matrix: &Vec<Vec<CyclotomicRing<MOD_Q, N>>>,
+    matrix: &[Vec<CyclotomicRing<MOD_Q, N>>],
 ) -> usize {
-    let bit_accumulator = matrix
-        .par_iter()
-        .map(|row| {
-            row.par_iter()
-                .map(|cell| cell.data.iter().fold(0u64, |a, b| a | b))
-                .reduce(|| 0u64, |a, b| a | b)
-        })
-        .reduce(|| 0u64, |a, b| a | b);
+    let bit_accumulator = matrix.iter().fold(0u64, |acc_row, row| {
+        let row_bits = row.iter().fold(0u64, |acc_cell, cell| {
+            cell.data.iter().fold(acc_cell, |a, &b| a | b)
+        });
+        acc_row | row_bits
+    });
 
     64 - bit_accumulator.leading_zeros() as usize
 }
 
 pub fn neg_matrix<'a, const MOD_Q: u64, const N: usize>(
-    matrix: impl ParallelIterator<Item = Vec<CyclotomicRing<MOD_Q, N>>>
-        + rayon::iter::IndexedParallelIterator
-        + 'a
-        + Clone,
-) -> impl ParallelIterator<Item = Vec<CyclotomicRing<MOD_Q, N>>>
-       + rayon::iter::IndexedParallelIterator
-       + 'a
-       + Clone {
-    matrix.map(|row| row.iter().map(|el| CyclotomicRing::zero() - *el).collect())
-}
-pub fn neg_matrix_orig<'a, const MOD_Q: u64, const N: usize>(
     matrix: &Vec<Vec<CyclotomicRing<MOD_Q, N>>>,
 ) -> Vec<Vec<CyclotomicRing<MOD_Q, N>>> {
     matrix
-        .par_iter()
+        .iter()
         .map(|row| row.iter().map(|el| CyclotomicRing::zero() - *el).collect())
         .collect()
 }
@@ -1500,7 +1489,7 @@ pub fn split_into_positive_and_negative<const MOD_Q: u64, const N: usize>(
     Vec<Vec<CyclotomicRing<MOD_Q, N>>>,
 ) {
     let (positive_matrix, negative_matrix): (Vec<_>, Vec<_>) = matrix
-        .into_par_iter()
+        .into_iter()
         .map(|row| {
             let row_len = row.len();
 
@@ -1512,8 +1501,8 @@ pub fn split_into_positive_and_negative<const MOD_Q: u64, const N: usize>(
                 neg_vec.set_len(row_len);
             }
             pos_vec
-                .par_iter_mut()
-                .zip(neg_vec.par_iter_mut())
+                .iter_mut()
+                .zip(neg_vec.iter_mut())
                 .enumerate()
                 .for_each(|(i, (pos, neg))| {
                     let (pos_data, neg_data) = split_simd::<MOD_Q, N>(&row[i].data);
@@ -1535,38 +1524,39 @@ pub fn split_into_positive_and_negative<const MOD_Q: u64, const N: usize>(
 }
 
 pub fn decompose<const MOD_Q: u64, const N: usize>(
-    matrix: &Vec<Vec<CyclotomicRing<MOD_Q, N>>>,
+    matrix: &[Vec<CyclotomicRing<MOD_Q, N>>],
     radix: u64,
     num_chunks: usize,
-) -> impl ParallelIterator<Item = Vec<CyclotomicRing<MOD_Q, N>>>
-       + rayon::iter::IndexedParallelIterator
-       + '_
-       + Clone {
+) -> Vec<Vec<CyclotomicRing<MOD_Q, N>>> {
     let chunk_mask = radix - 1;
     let shift_amount = radix.trailing_zeros() as usize;
 
     let rows = matrix.len();
     let cols = matrix[0].len();
 
-    (0..cols).into_par_iter().map(move |col_idx| {
-        (0..rows)
-            .flat_map(|row_idx| {
-                let cell = &matrix[row_idx][col_idx];
+    (0..cols)
+        .map(|col_idx| {
+            (0..rows)
+                .flat_map(|row_idx| {
+                    let cell = &matrix[row_idx][col_idx];
 
-                (0..num_chunks).map(move |chunk_idx| {
-                    let mut chunk = CyclotomicRing::zero();
-                    for k in 0..N {
-                        let mut val = cell.data[k];
-                        for _ in 0..chunk_idx {
-                            val >>= shift_amount;
+                    (0..num_chunks).map(move |chunk_idx| {
+                        let mut chunk = CyclotomicRing::<MOD_Q, N>::zero();
+
+                        for k in 0..N {
+                            let mut val = cell.data[k];
+
+                            val >>= chunk_idx * shift_amount;
+
+                            chunk.data[k] = val & chunk_mask;
                         }
-                        chunk.data[k] = val & chunk_mask;
-                    }
-                    chunk
+
+                        chunk
+                    })
                 })
-            })
-            .collect::<Vec<_>>()
-    })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>()
 }
 
 pub fn decompose_matrix_by_chunks<const MOD_Q: u64, const N: usize>(
@@ -1585,8 +1575,8 @@ pub fn decompose_matrix_by_chunks<const MOD_Q: u64, const N: usize>(
     let radix = (2u64).pow(radix_log);
 
     let decomposed_matrix = add_matrices_transposed(
-        decompose(&positive_matrix, radix, num_chunks),
-        neg_matrix(decompose(&negative_matrix, radix, num_chunks)),
+        &decompose(&positive_matrix, radix, num_chunks),
+        &neg_matrix(&decompose(&negative_matrix, radix, num_chunks)),
     );
 
     (decomposed_matrix, radix)
@@ -1712,7 +1702,7 @@ pub fn compose_with_radix<const MOD_Q: u64, const N: usize>(
 
     add_matrices(
         &compose(&positive_matrix),
-        &neg_matrix_orig(&compose(&negative_matrix)),
+        &neg_matrix(&compose(&negative_matrix)),
     )
 }
 

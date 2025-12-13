@@ -71,9 +71,7 @@ mod tests {
     use super::*;
     const MOD_Q: u64 = 4546383823830515713;
     const N: usize = 8;
-    use crate::arithmetic::{
-        compose_with_radix_mod,sample_random_short_mat, 
-    };
+    use crate::arithmetic::{compose_with_radix_mod, sample_random_short_mat};
     use crate::subroutines::crs::CRS;
     #[test]
     fn test_decomp() {
