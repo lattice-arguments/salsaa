@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use num_traits::Zero;
 use rayon::prelude::*;
@@ -142,6 +142,7 @@ pub fn batch_projections<const MOD_Q: u64, const N: usize>(
     PowerSeries<MOD_Q, N>,
     Vec<CyclotomicRing<MOD_Q, N>>,
     Vec<CyclotomicRing<MOD_Q, N>>,
+    Duration
 ) {
     let chunk_width = witness.len() * HEIGHT;
     let c_0_consecutive_powers = consecutive_powers::<MOD_Q, N>(challenge.0, HEIGHT);
@@ -151,6 +152,8 @@ pub fn batch_projections<const MOD_Q: u64, const N: usize>(
     unsafe {
         cj.set_len(chunk_width);
     }
+
+    let now = Instant::now();
 
     cj.par_iter_mut().enumerate().for_each(|(j, cj_j)| {
         let acc = c_0_consecutive_powers
@@ -168,6 +171,7 @@ pub fn batch_projections<const MOD_Q: u64, const N: usize>(
 
         *cj_j = acc;
     });
+    let verifier_runtime = now.elapsed();
 
     let nof_tensor_layers = (witness[0].len() / chunk_width).ilog2() as usize;
     let nof_tensor_layers_projection = nof_tensor_layers + witness.len().ilog2() as usize;
@@ -195,7 +199,7 @@ pub fn batch_projections<const MOD_Q: u64, const N: usize>(
 
     power_series.push(witness_lhs);
 
-    (projected_lhs, projection_rhs, witness_rhs)
+    (projected_lhs, projection_rhs, witness_rhs, verifier_runtime)
 }
 
 pub fn verify_batching<const MOD_Q: u64, const N: usize>(

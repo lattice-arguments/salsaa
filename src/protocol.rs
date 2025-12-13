@@ -323,7 +323,7 @@ pub fn protocol<const MOD_Q: u64, const N: usize>() {
         verifier_runtime = verifier_runtime + elapsed;
 
         let now = Instant::now();
-        let (projected_lhs, projection_rhs, witness_rhs) = batch_projections::<MOD_Q, N>(
+        let (projected_lhs, projection_rhs, witness_rhs, inner_verifier_runtime) = batch_projections::<MOD_Q, N>(
             &projected_witness,
             &witness,
             &challenge,
@@ -332,6 +332,8 @@ pub fn protocol<const MOD_Q: u64, const N: usize>() {
         );
         let elapsed = now.elapsed();
         println_with_timestamp!("Time for batch projections: {:.2?}", elapsed);
+        println_with_timestamp!("Time for verifier in batch projection : {:.2?}", inner_verifier_runtime);
+        verifier_runtime = verifier_runtime + inner_verifier_runtime;
         prover_runtime = prover_runtime + elapsed;
         t_projection += elapsed;
 
