@@ -74,12 +74,14 @@ cfg_if::cfg_if! {
         pub static MODULE_SIZE: usize = 12;
         pub static WIT_LEN: usize = 1 << 23;
         pub static NOF_ROUNDS: i32 = 12;
+        pub const FOLDING_SCHEME: bool = false;
     } else if #[cfg(feature = "C1")] {
         pub const N: usize = 256;
         pub const MOD_Q: u64 = 1125899906840833;
         pub static MODULE_SIZE: usize = 7;
         pub static WIT_LEN: usize = 1 << 22;
         pub static NOF_ROUNDS: i32 = 11;
+        pub const FOLDING_SCHEME: bool = false;
     } else if #[cfg(feature = "C2")] {
         pub const N: usize = 512;
         pub const MOD_Q: u64 = 1125899906822657;
@@ -91,20 +93,22 @@ cfg_if::cfg_if! {
         pub const N: usize = 128;
         pub const MOD_Q: u64 = 1125899904679937;
         pub static FOLDING_SCHEME: bool = true;
-        pub static INIT_WIT_REP: usize = 4;
         pub static MODULE_SIZE: usize = 12;
+        pub static NOF_ROUNDS: i32 = 1;
         pub static WIT_LEN: usize = 1 << 17;
 
     } else if #[cfg(feature = "F1")] {
         pub const N: usize = 128;
         pub const MOD_Q: u64 = 1125899904679937;
         pub static FOLDING_SCHEME: bool = true;
+        pub static NOF_ROUNDS: i32 = 1;
         pub static MODULE_SIZE: usize = 13;
         pub static WIT_LEN: usize = 1 << 19;
 
     } else if #[cfg(feature = "F2")] {
         pub const N: usize = 128;
         pub static FOLDING_SCHEME: bool = true;
+        pub static NOF_ROUNDS: i32 = 1;
         pub const MOD_Q: u64 = 1125899904679937;
         pub static MODULE_SIZE: usize = 13;
         pub static WIT_LEN: usize = 1 << 21;
